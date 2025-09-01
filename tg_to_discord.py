@@ -7,10 +7,10 @@ import discord
 import asyncio
 
 # --- CONFIG ---
-TELEGRAM_BOT_TOKEN = '7834460420:AAHLafhZurqyRpdSV2SlyjENfQA1vY84SJg'
-TELEGRAM_CHAT_ID = '5222283537'  # The chat/channel/group to listen to
-DISCORD_BOT_TOKEN = 'MTM2MDg1NjU3OTk5MzM3NDg0MA.GMqSET.E9YlhFsdiuzYz6WVxCZsjh0nLOyrSJfsz8UeMM'
-DISCORD_CHANNEL_ID = 1340246830620868648
+TELEGRAM_BOT_TOKEN = 'YOUR TELEGRAM BOT TOKEN'
+TELEGRAM_CHAT_ID = 'YOUR CHAT ID'  # The chat/channel/group to listen to
+DISCORD_BOT_TOKEN = 'YOUR DISCORD BOT TOKEN'
+DISCORD_CHANNEL_ID = YOUR DISCORD CHANNEL ID  # Enter normally no need '' 
 
 # --- Discord Setup ---
 intents = discord.Intents.default()
