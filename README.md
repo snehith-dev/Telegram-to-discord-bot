@@ -25,9 +25,6 @@ This bot automatically forwards **messages**, **photos**, and **videos** from a 
    ```bash
    git clone https://github.com/snehith-dev/Telegram-to-discord-bot.git
 
-## Install dependencies
-pip install -r requirements.txt
-
 ## Set up configuration
 Create a .env file or edit config.py with the following:
 - TELEGRAM_BOT_TOKEN=your_telegram_bot_token
