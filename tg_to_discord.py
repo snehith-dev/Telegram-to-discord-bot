@@ -8,9 +8,9 @@ import asyncio
 
 # --- CONFIG ---
 TELEGRAM_BOT_TOKEN = 'YOUR TELEGRAM BOT TOKEN'
-TELEGRAM_CHAT_ID = 'YOUR CHAT ID'  # The chat/channel/group to listen to
+TELEGRAM_CHAT_ID = 'YOUR TELEGRAM CHAT ID'  # The chat/channel/group to listen to
 DISCORD_BOT_TOKEN = 'YOUR DISCORD BOT TOKEN'
-DISCORD_CHANNEL_ID = YOUR DISCORD CHANNEL ID  # Enter normally no need '' 
+DISCORD_CHANNEL_ID = YOUR DISCORD CHANNEL ID
 
 # --- Discord Setup ---
 intents = discord.Intents.default()
@@ -37,11 +37,14 @@ async def send_to_discord(content=None, file_path=None, filename=None):
     if channel is None:
         print('Discord channel not found!')
         return
-    if file_path:
-        with open(file_path, 'rb') as f:
-            await channel.send(content, file=discord.File(f, filename=filename))
-    else:
-        await channel.send(content)
+    try:
+        if file_path and os.path.exists(file_path):
+            with open(file_path, 'rb') as f:
+                await channel.send(content, file=discord.File(f, filename=filename))
+        else:
+            await channel.send(content)
+    except Exception as e:
+        print(f'Failed to send to Discord: {e}')
 
 # --- Telegram Handlers ---
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -54,9 +57,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         photo = update.effective_message.photo[-1]  # Best quality
         file = await context.bot.get_file(photo.file_id)
         file_path = f"temp_{photo.file_id}.jpg"
-        await file.download_to_drive(file_path)
+        try:
+            await file.download_to_drive(file_path)
+        except Exception:
+            await file.download(file_path)
         await send_to_discord(content=text, file_path=file_path, filename=os.path.basename(file_path))
-        os.remove(file_path)
+        if os.path.exists(file_path):
+            os.remove(file_path)
         return
 
     # Handle videos
@@ -64,9 +71,34 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         video = update.effective_message.video
         file = await context.bot.get_file(video.file_id)
         file_path = f"temp_{video.file_id}.mp4"
-        await file.download_to_drive(file_path)
+        try:
+            await file.download_to_drive(file_path)
+        except Exception:
+            await file.download(file_path)
         await send_to_discord(content=text, file_path=file_path, filename=os.path.basename(file_path))
-        os.remove(file_path)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        return
+
+    # Handle GIFs (animations)
+    if update.effective_message.animation:
+        animation = update.effective_message.animation
+        file = await context.bot.get_file(animation.file_id)
+        # Use the original file extension if available
+        ext = os.path.splitext(animation.file_name or "")[1] or ".gif"
+        file_path = f"temp_{animation.file_id}{ext}"
+        try:
+            await file.download_to_drive(file_path)
+        except Exception:
+            await file.download(file_path)
+        if os.path.exists(file_path):
+            try:
+                await send_to_discord(content=text, file_path=file_path, filename=os.path.basename(file_path))
+            except Exception as e:
+                print(f"Failed to send GIF to Discord: {e}")
+            os.remove(file_path)
+        else:
+            print("GIF file was not downloaded correctly.")
         return
 
     # Handle text only
